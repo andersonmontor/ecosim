@@ -4,5 +4,5 @@ class NPC_AI:
 
 	state = "IDLE"
 
-	def make_decision(self):
+	def play(self):
 		pass

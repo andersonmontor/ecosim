@@ -1,12 +1,11 @@
 import pygame as pg
+import config as c
 
-WINDOW_HEIGHT = 728
-WINDOW_WIDTH = 1024
-MAX_FPS = 60
 
 # Colors
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 
 
 class GUI:
@@ -15,23 +14,24 @@ class GUI:
 		pg.init()
 		pg.display.set_caption("EcoSim")
 
-		self.screen = pg.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+		self.screen = pg.display.set_mode((self.simulator.MAX_X,
+											self.simulator.MAX_Y))
 
 		self.clock = pg.time.Clock()
-		self.clock.tick(MAX_FPS)
+		self.clock.tick(c.MAX_FPS)
 
 	def handle_events(self):
 		for event in pg.event.get():
 			if event.type == pg.QUIT:
-				print ("exit detected")
 				self.simulator.running = False
 
-	def draw_phase(self):
+	def get_delta(self):
 		if self.clock.get_fps() != 0:
-			self.delta = (1. / self.clock.get_fps()) * MAX_FPS
-
+			return (1. / self.clock.get_fps()) * c.MAX_FPS
 		else:
-			self.delta = 1.
+			return 1.
+
+	def draw_phase(self):
 
 		# Clear screen
 		self.screen.fill(WHITE)
@@ -41,8 +41,14 @@ class GUI:
 		# -- Draw NPCs
 		for npc in self.simulator.npc_list:
 			if npc.showing():
-				pg.draw.circle(self.screen, GREEN, (npc.x, npc.y), 10)
+				pg.draw.circle(self.screen, GREEN, (npc.pos.x, npc.pos.y), 10)
+
+		# -- Draw SHOPs
+		for shop in self.simulator.shop_list:
+			if shop.showing():
+				rect = pg.Rect(shop.pos.x, shop.pos.y, 40, 40)
+				pg.draw.rect(self.screen, BLUE, rect)
 
 		# Update
 		pg.display.update()
-		self.clock.tick(MAX_FPS)
+		self.clock.tick(c.MAX_FPS)

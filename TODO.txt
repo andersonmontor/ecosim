@@ -1,0 +1,73 @@
+Legenda:
+
++: Implementar agora
+*: Implementar futuramente
+?: A decidir o que fazer
+---------------------------------------------------------------------------
+
+-- Simulator
+
++Moeda monetária é simulado como um recurso normal que pode ser produzido(como ouro minerado), que é usado por padrão para compras entre NPCs.
+
+- NPCs
++Possuem nome, id, inventario, dinheiro, capacidade, velocidade, e um controlador(AI)
+
+*Possuem stats para variar seus atributos
+*Possuem idade e morrem
+*Possuem familias, podendo cruzar com outros NPCs com variação genetica
+	?Conta e inventario conjunto entre casais
+	*Herança
+*Podem haver skills, que determinam produção de um item
+*Maioria dos items finais são luxuries, e luxuries unicas garantem happiness pro NPC, que afeta produtividade diretamente
+
+- Item(ItemType?)
++Possui id, nome, receita, volume
+
+- Shops
+
++Possuem id, item a ser produzido, storage pra cada item input/output e dono do shop, preço de cada item(metodo?)
+
+?Possuem caixa proprio ou usa diretamente do dono
+?Sistema de preço: baseado na porcentagem de compras/produções recentes, 100% vendas = preço maximo, 100% produção = preço minimo, começa 50%(average)
+
+*demandas basicas: food(high consumption), clothes(low consumption), etc
+*Requirimento de precisar NPCs trabalhando no shop para produzir
+*Caso existir skill de NPC, fatorar na produção
+*Empresas, aglomerado de shops com conta conjunta, pode ter diversos donos(random name generator)
+*Bancos que emprestam dinheiro
+*General stores que compram preço abaixo da média, vende na média(ou similar)
+*Formas de incentivar especialização de shops por dono ou por região
+*Podem ser colocados a venda por donos
+
+- World gen
+
++Gera um número N de NPCs iniciais, dinheiro fixo
++Gera um número de shops, atribui a NPCs
+
+*Gera dinheiro inicial baseado em distribuição normal
+*Gera regiões para criação de shops(grid?)
+*Gera atributos naturais das regiões que afetam produção(ore deposits, por exemplo)
+
+-- AI
+
++Loop de procurar trade runs considerando lucro e distância
+
+*Considerar construir um shop
+
+-- GUI
+
++Desenha NPCs como círculos
++Inicialmente usa bastante o terminal para printar informações
+
+?Cores baseadas em dinheiro disponivel
+
+*Mostra informação quando clica numa entidade
+*Gera graficos que representam o estado e historico da simulação
+
+- Misc
+
+? Cidades, que são aglomerados de shops e NPCs, distantes uma das outras
+	Sistemas de transporte entre cidades(avião, barco, etc)
+	NPCs administrativos que regulam taxas e leis da cidade
+
+* Bolsa de valores
