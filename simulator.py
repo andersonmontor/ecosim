@@ -1,5 +1,6 @@
 import config as c
 import AI
+import random as r
 
 
 # Kind of a point too...
@@ -25,9 +26,20 @@ class Vector:
 		self.x -= other.x
 		self.y -= other.y
 
+	def get_magnitude(self):
+		return (self.x ** 2 + self.y ** 2)**0.5
+
 	def normalize(self):
-		mag = (self.x ** 2 + self.y ** 2)**0.5
-		self.divide(mag)
+		self.divide(self.get_magnitude())
+
+	def get_rounded(self):
+		x = round(self.x)
+		y = round(self.y)
+
+		return Vector(x, y)
+
+	def str(self):
+		return ("(%d, %d)" % (self.x, self.y))
 
 	def vector_to_other(self, other):
 		x = other.x - self.x
@@ -88,6 +100,10 @@ class WorldEntity:
 
 		return vec
 
+	def distance_to_entity(self, other):
+		vec = self.pos.vector_to_other(other.pos)
+		return vec.get_magnitude()
+
 
 class NPC(WorldEntity):
 
@@ -95,22 +111,12 @@ class NPC(WorldEntity):
 	controller = None  # controller object(AI/human player)
 	base_speed = 1
 
-	def __init__(self, name, x, y):
+	def __init__(self, name, x, y, simobj):
 		super().__init__(name, x, y)
-		self.controller = AI.NPC_AI()
-		self.controller.npc = self
+		self.controller = AI.NPC_AI(self, simobj)
 
 	def movespeed(self):
 		return self.base_speed
-
-	def move_this_direction(self, vecdir):
-		if self.ready:
-			vecdir.normalize()
-			vecdir.multiply(self.movespeed())
-			self.pos.add(vecdir)
-
-			self.ready = False
-			return True
 
 
 class Shop(WorldEntity):
@@ -153,13 +159,34 @@ class Simulator:
 			self.gui.draw_phase()
 
 	def world_gen(self):
-		new_npc = NPC("Teste", 200, 200)
-		new_shop = Shop("Test shop", 500, 500)
-		self.addNPC(new_npc)
-		self.addShop(new_shop)
+
+		for i in range(2000):
+			x = r.randint(0, c.WORLD_WIDTH)
+			y = r.randint(0, c.WORLD_HEIGHT)
+			new_npc = NPC("NPC %d" % i, x, y, self)
+			self.addNPC(new_npc)
+
+		for i in range(50):
+			x = r.randint(0, c.WORLD_WIDTH)
+			y = r.randint(0, c.WORLD_HEIGHT)
+			new_shop = Shop("SHOP %d" % i, x, y)
+			self.addShop(new_shop)
 
 	def addNPC(self, npcobj):
 		self.npc_list.append(npcobj)
 
 	def addShop(self, shopobj):
 		self.shop_list.append(shopobj)
+
+	def move_to_dir(self, entity, vecdir):
+		if entity.ready:
+			vecdir.normalize()
+			vecdir.multiply(entity.movespeed() * self.delta)
+			entity.pos.add(vecdir)
+
+			entity.ready = False
+			return True
+
+	def move_to_ent(self, source, dest):
+		direction = source.direction_to_entity(dest)
+		self.move_to_dir(source, direction)

@@ -3,5 +3,6 @@ import GUI
 
 
 if __name__ == "__main__":
-	mainobj = simulator.Simulator(GUI.GUI())
+	guiobj = GUI.GUI()
+	mainobj = simulator.Simulator(guiobj)
 	mainobj.main_loop()
