@@ -1,6 +1,8 @@
-import config as c
-import AI
 import random as r
+from math import sqrt
+import config as c
+import itemsloader as il
+import AI
 
 
 # Kind of a point too...
@@ -27,7 +29,7 @@ class Vector:
 		self.y -= other.y
 
 	def get_magnitude(self):
-		return (self.x ** 2 + self.y ** 2)**0.5
+		return sqrt(self.x * self.x + self.y * self.y)
 
 	def normalize(self):
 		self.divide(self.get_magnitude())
@@ -48,20 +50,11 @@ class Vector:
 		return Vector(x, y)
 
 
-class Item:
-
-	id = -1
-	name = ""
-	volume = 1
-	recipe = {}  # dict of IDs of items and amounts
-
-
 class WorldEntity:
 
 	id = -1
 	name = ""
 	inventory = {}
-	capacity = 1000
 	ready = True
 
 	def __init__(self, name, x, y):
@@ -78,8 +71,12 @@ class WorldEntity:
 			else:
 				self.inventory[itemobj] = quant
 			return True
-		else:
-			return False
+
+	def removeItem(self, itemobj, quant):
+		if itemobj in self.inventory.keys():
+			self.inventory[itemobj] -= quant
+			if self.inventory[itemobj] <= 0:
+				del self.inventory[itemobj]
 
 	def haveRoomFor(self, itemobj, quant):
 			return (self.usedCapacity() + (itemobj.volume * quant)) \
@@ -107,13 +104,14 @@ class WorldEntity:
 
 class NPC(WorldEntity):
 
-	money = 0.0
+	money = 0
 	controller = None  # controller object(AI/human player)
 	base_speed = 1
 
 	def __init__(self, name, x, y, simobj):
 		super().__init__(name, x, y)
 		self.controller = AI.NPC_AI(self, simobj)
+		self.capacity = c.DEFAULT_CAP
 
 	def movespeed(self):
 		return self.base_speed
@@ -122,7 +120,33 @@ class NPC(WorldEntity):
 class Shop(WorldEntity):
 
 	owner = None  # NPC object
-	itemproduction = None  # Item object
+
+	def __init__(self, name, x, y, item):
+		super().__init__(name, x, y)
+		self.item_output = item
+		self.capacity = c.DEFAULT_CAP * c.SHOP_CAP_MULTI
+		self.prod_cooldown = 0
+
+	def produce(self, delta, batch_size):
+
+		if self.prod_cooldown > 0:
+			self.prod_cooldown -= delta
+		elif self.has_enough_res(batch_size):
+			for res, qnt in self.item_output.recipe.items():
+				self.removeItem(res, qnt * batch_size)
+
+			self.addItem(self.item_output, batch_size)
+			self.prod_cooldown = c.BASE_PCOOLDOWN
+
+	def has_enough_res(self, batch_size):
+
+		for res, qnt in self.item_output.recipe.items():
+			if res not in self.inventory.keys():
+				return False
+			if self.inventory[res] < qnt * batch_size:
+				return False
+
+		return True
 
 
 class Simulator:
@@ -134,11 +158,11 @@ class Simulator:
 		self.shop_list = []
 		self.MAX_X = c.WORLD_WIDTH
 		self.MAX_Y = c.WORLD_HEIGHT
+		self.elapsed_time = 0
 
 	def main_loop(self):
 
 		self.gui.start()
-
 		self.world_gen()
 
 		self.running = True
@@ -147,6 +171,7 @@ class Simulator:
 			self.gui.handle_events()
 
 			self.delta = self.gui.get_delta() * c.SIM_SPEED
+			self.elapsed_time += self.delta
 
 			# Prep entities for frame
 			for ent in self.npc_list + self.shop_list:
@@ -160,7 +185,7 @@ class Simulator:
 
 	def world_gen(self):
 
-		for i in range(2000):
+		for i in range(500):
 			x = r.randint(0, c.WORLD_WIDTH)
 			y = r.randint(0, c.WORLD_HEIGHT)
 			new_npc = NPC("NPC %d" % i, x, y, self)
@@ -169,7 +194,7 @@ class Simulator:
 		for i in range(50):
 			x = r.randint(0, c.WORLD_WIDTH)
 			y = r.randint(0, c.WORLD_HEIGHT)
-			new_shop = Shop("SHOP %d" % i, x, y)
+			new_shop = Shop("SHOP %d" % i, x, y, il.ITEMDEFS_N["Iron Ore"])
 			self.addShop(new_shop)
 
 	def addNPC(self, npcobj):

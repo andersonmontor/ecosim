@@ -1,0 +1,4 @@
+#id, name, volume, base price, input1:qnt|input2:qnt
+0,Iron Ore,2,10
+1,Iron Ingot, 1, 15, 0:1
+2,Tool, 1, 115, 1:5

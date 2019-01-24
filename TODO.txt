@@ -34,6 +34,7 @@ Legenda:
 *Requirimento de precisar NPCs trabalhando no shop para produzir
 *Caso existir skill de NPC, fatorar na produção
 *Empresas, aglomerado de shops com conta conjunta, pode ter diversos donos(random name generator)
+*?Contratos de descontos entre empresas dependentes
 *Bancos que emprestam dinheiro
 *General stores que compram preço abaixo da média, vende na média(ou similar)
 *Formas de incentivar especialização de shops por dono ou por região

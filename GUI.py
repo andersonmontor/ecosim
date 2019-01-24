@@ -2,8 +2,6 @@ import pygame as pg
 import config as c
 
 
-DEFAULT_FPS = 60
-
 # Colors
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
@@ -30,7 +28,7 @@ class GUI:
 
 	def get_delta(self):
 		if self.clock.get_fps() != 0:
-			return (1. / self.clock.get_fps()) * DEFAULT_FPS
+			return (1. / self.clock.get_fps()) * c.DEFAULT_FPS
 		else:
 			return 1.
 
